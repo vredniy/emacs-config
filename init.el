@@ -64,6 +64,9 @@
 
 (ac-config-default)
 
+; AC does not complete when you are in face specified by ac-disable-faces. It is '(font-lock-comment-face font-lock-string-face font-lock-doc-face) by default
+(setq ac-disable-faces nil)
+
 (setq-default
  ac-sources '(
 	      ac-source-words-in-all-buffer
@@ -71,6 +74,7 @@
 	      ac-source-files-in-current-dir              
 	      )
  )
+
 (defun auto-complete-mode-maybe ()
   "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
   (unless (minibufferp (current-buffer))
