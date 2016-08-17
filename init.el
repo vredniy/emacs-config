@@ -219,11 +219,21 @@
 ; {{{ /mouse scroll
 
 
+; {{{ indentation
+(setq-default indent-tabs-mode nil)
+(setq tab-width 2)
+
+(global-set-key (kbd "s-M-<right>") 'hs-show-block)
+(global-set-key (kbd "s-M-<left>") 'hs-hide-block)
+
+
+; }}} /indentation
+
 
 
 (require 'god-mode)
-;(global-set-key (kbd "<escape>") 'god-local-mode)
-(global-set-key (kbd "<escape>") 'god-mode-all)
+(global-set-key (kbd "<escape>") 'god-local-mode)
+;(global-set-key (kbd "<escape>") 'god-mode-all)
 
 (defun my-update-cursor ()
   (setq cursor-type (if (or god-local-mode buffer-read-only)
