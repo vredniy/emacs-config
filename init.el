@@ -152,6 +152,7 @@
 (projectile-global-mode)
 (setq projectile-completion-system 'helm)
 (helm-projectile-on)
+(helm-autoresize-mode 1) ; experimental
 
 (setq helm-split-window-in-side-p           t
       helm-buffers-fuzzy-matching           t
@@ -183,7 +184,8 @@
 (require 'recentf)			;
 (recentf-mode 1)
 (setq recentf-max-menu-items 25)
-(global-set-key (kbd "C-x C-r") 'recentf-open-files)
+;(global-set-key (kbd "C-x C-r") 'recentf-open-files)
+(global-set-key (kbd "s-r") 'helm-recentf)
 
 ;(init-open-recentf)
 
