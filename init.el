@@ -89,6 +89,21 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (load-theme 'solarized-light t)
 
+(require 'evil-visualstar)
+(global-evil-visualstar-mode)
+
+;; {{{ volatile-highlights
+(require 'volatile-highlights)
+(volatile-highlights-mode t)
+
+(vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+                      'evil-paste-pop 'evil-move)
+(vhl/install-extension 'evil)
+
+(vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+(vhl/install-extension 'undo-tree)
+;; }}} /volatile-highlights
+
 
 (require 'evil-leader)
 (global-evil-leader-mode)
@@ -190,6 +205,11 @@
 ;; Both of the above work only when the connection to the Ruby subprocess has been established. To do that, either use one of the core Robe commands, or type M-x robe-start.
 (add-hook 'robe-mode-hook 'ac-robe-setup)
 ;; }}} /ruby
+
+;; hyphen is a part of word
+(modify-syntax-entry ?- "_")
+(modify-syntax-entry ?_ "_")
+
 
 ;; {{{ comments
 (setq ess-fancy-comments nil) ;; Comments are also handled specially by ESS, using an idea borrowed from the Emacs-Lisp indentation style (http://stackoverflow.com/questions/26312317/wrong-indentation-of-comments-in-emacs)
