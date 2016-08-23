@@ -192,7 +192,7 @@
 
 
 ;; appearence
-(set-frame-font "Hack-15")
+(set-frame-font "Hack-14")
 
 (rainbow-identifiers-mode)
 
@@ -206,10 +206,21 @@
 (add-hook 'robe-mode-hook 'ac-robe-setup)
 ;; }}} /ruby
 
-;; hyphen is a part of word
-(modify-syntax-entry ?- "_")
-(modify-syntax-entry ?_ "_")
+;; (with-eval-after-load 'robe-mode
+;;             (modify-syntax-entry ?- "_")
+;;             (modify-syntax-entry ?_ "_"))
 
+;; (with-eval-after-load 'robe
+;;             (modify-syntax-entry ?- "_")
+;;             (modify-syntax-entry ?_ "_"))
+
+;; hyphen is a part of word
+;; (modify-syntax-entry ?- "_")
+;; (modify-syntax-entry ?_ "_")
+
+;; This makes * and # use emacs-symbols instead of words
+;; (e.g.) mamb_ctrl_scaleConversion
+(setq-default evil-symbol-word-search t)
 
 ;; {{{ comments
 (setq ess-fancy-comments nil) ;; Comments are also handled specially by ESS, using an idea borrowed from the Emacs-Lisp indentation style (http://stackoverflow.com/questions/26312317/wrong-indentation-of-comments-in-emacs)
@@ -221,7 +232,7 @@
 ;; {{{ mouse scroll
 ;; scroll one line at a time (less "jumpy" than defaults)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-(setq mouse-wheel-progressive-speed t) ;; do accelerate scrolling
+(setq mouse-wheel-progressive-speed nil) ;; do accelerate scrolling
 (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
 (setq scroll-step 1) ;; keyboard scroll one line at a time
 ;; {{{ /mouse scroll
@@ -289,3 +300,26 @@
 
 (setq savehist-file "~/.emacs.d/savehist")
 ;; }}} History
+
+;; {{{ org-mode
+(require 'org)
+;; Make org-mode work with files ending in .org
+(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+;; }}} /org-mode
+
+
+(require 'web-mode)
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-markup-indent-offset 2))
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+(setq web-mode-disable-autocompletion t)
+(local-set-key (kbd "RET") 'newline-and-indent)
+
+(add-to-list 'ac-modes 'web-mode)
+(setq web-mode-extra-snippets
+      '(("erb" . (("=" . "<%= | %>")))))
