@@ -224,7 +224,24 @@
 
 ;; {{{ comments
 (setq ess-fancy-comments nil) ;; Comments are also handled specially by ESS, using an idea borrowed from the Emacs-Lisp indentation style (http://stackoverflow.com/questions/26312317/wrong-indentation-of-comments-in-emacs)
+
+;; gcc and gc
+(unless (package-installed-p 'evil-commentary)
+  (package-install 'evil-commentary)
+
+  (require 'evil-commentary)
+  (evil-commentary-mode))
+
+
 ;; }}} /comments
+
+;; {{{ tuning evil-mode
+(define-key evil-normal-state-map (kbd "[ b") 'previous-buffer) ;; Go to previous buffer
+(define-key evil-normal-state-map (kbd "] b") 'next-buffer) ;; Go to next buffer
+
+(with-eval-after-load 'evil
+  (defalias #'forward-evil-word #'forward-evil-symbol))
+;; }}} /tuning evil-mode
 
 
 
