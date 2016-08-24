@@ -1,4 +1,4 @@
-(setq framt-title-format "emacs")
+(setq frame-title-format "emacs")
 (setq inhibit-startup-message t)
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -12,19 +12,60 @@
 
 (windmove-default-keybindings)
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("org"   . "http://orgmode.org/elpa/")   t)
-
 (package-initialize)
 
-(unless (package-installed-p 'alchemist)
-  (package-install 'alchemist))
+(use-package package
+  :ensure t
+  :config
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("org"   . "http://orgmode.org/elpa/")   t))
 
-(require 'alchemist)
+;; (use-package evil-smartparens
+;;   :config
+;;   (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode)
+;;   (add-hook 'prog-mode-hook 'turn-on-smartparens-strict-mode)
+;;   (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode)))
 
-(setq alchemist-key-command-prefix (kbd "C-c a"))
-(add-hook 'elixir-mode-hook 'ac-alchemist-setup)
+;; (require 'package)
+;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+;; (add-to-list 'package-archives '("org"   . "http://orgmode.org/elpa/")   t)
+
+;; (package-initialize)
+
+(use-package alchemist
+  :ensure t
+  :config
+  (setq alchemist-key-command-prefix (kbd "C-c a"))
+  (add-hook 'elixir-mode-hook 'ac-alchemist-setup))
+;; (unless (package-installed-p 'alchemist)
+;;   (package-install 'alchemist))
+
+;; (require 'alchemist)
+
+(use-package tabbar-ruler
+  :ensure t
+  :init
+  (setq tabbar-ruler-global-tabbar t)    ; get tabbar
+  (setq tabbar-ruler-global-ruler t)     ; get global ruler
+  (setq tabbar-ruler-popup-menu t)       ; get popup menu.
+  (setq tabbar-ruler-popup-toolbar t)    ; get popup toolbar
+  (setq tabbar-ruler-popup-scrollbar t)  ; show scroll-bar on mouse-move
+
+  ;; The default behavior for tabbar-ruler is to group the tabs by frame. You can change this back to the old-behavior by
+  ;; (setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
+
+  :config
+  ;; you can also group by projectile project easily by
+  ;; (tabbar-ruler-group-by-projectile-project)
+  )
+
+(use-package evil-search-highlight-persist
+  :ensure t
+  :config
+  (global-evil-search-highlight-persist t)
+  (evil-leader/set-key "SPC" 'evil-search-highlight-persist-remove-all)
+  )
+
 
 (ido-mode)
 
@@ -40,9 +81,16 @@
 (ido-ubiquitous-mode +1)
 
 ;; smarter fuzzy matching for ido
-(flx-ido-mode +1)
+;; (require 'flx-ido)
+;; (ido-mode 1)
+;; (ido-everywhere 1)
+;; (flx-ido-mode +1)
+;; ;; (flx-ido-mode 1)
+;; ;; disable ido faces to see flx highlights.
+;; (setq ido-enable-flex-matching t)
+;; (setq ido-use-faces nil)
 
-
+(global-set-key (kbd "<escape>")      'keyboard-escape-quit)
 
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
@@ -114,15 +162,13 @@
   "k" 'kill-buffer)
 
 (require 'evil)
-;; TODO: you should definetly read evil-mode documentation
 (evil-mode 1)
 
 (require 'evil-surround)
 (global-evil-surround-mode)
 
-
 (global-linum-mode t)
-(setq linum-format "%4d \u2502 ")
+(setq linum-format "%3d \u2502 ")
 
 
 ;; {{ change mode-line color by evil state
@@ -169,11 +215,11 @@
 (define-key projectile-mode-map [?\s-g] 'helm-projectile-ag)
 
 
+
 ;; backup folder in ~/.emacs
 (setq
  backup-by-copying t      ; don't clobber symlinks
- backup-directory-alist
- '(("." . "~/.saves"))    ; don't litter my fs tree
+ backup-directory-alist '(("." . "~/.saves"))    ; don't litter my fs tree
  delete-old-versions t
  kept-new-versions 6
  kept-old-versions 2
@@ -183,7 +229,7 @@
 (require 'anzu)
 (global-anzu-mode +1)
 
-(require 'recentf)			;
+(require 'recentf)
 (recentf-mode 1)
 (setq recentf-max-menu-items 250)
 (global-set-key (kbd "s-r") 'helm-recentf)
@@ -227,10 +273,10 @@
 
 ;; gcc and gc
 (unless (package-installed-p 'evil-commentary)
-  (package-install 'evil-commentary)
+  (package-install 'evil-commentary))
 
-  (require 'evil-commentary)
-  (evil-commentary-mode))
+(require 'evil-commentary)
+(evil-commentary-mode)
 
 
 ;; }}} /comments
@@ -241,6 +287,13 @@
 
 (with-eval-after-load 'evil
   (defalias #'forward-evil-word #'forward-evil-symbol))
+
+(require 'evil-exchange)
+;; change default key bindings (if you want) HERE
+;; (setq evil-exchange-key (kbd "zx"))
+(evil-exchange-install)
+
+(setq evil-want-fine-undo 'fine) ;; http://emacs.stackexchange.com/questions/3358/how-can-i-get-undo-behavior-in-evil-similar-to-vims
 ;; }}} /tuning evil-mode
 
 
@@ -266,18 +319,18 @@
 
 
 ;; TODO: remove me please
-(require 'god-mode)
-(global-set-key (kbd "<escape>") 'god-local-mode)
-;; (global-set-key (kbd "<escape>") 'god-mode-all)
+;; (require 'god-mode)
+;; (global-set-key (kbd "<escape>") 'god-local-mode)
+;; ;; (global-set-key (kbd "<escape>") 'god-mode-all)
 
-(defun my-update-cursor ()
-  (setq cursor-type (if (or god-local-mode buffer-read-only) 'box 'bar)))
+;; (defun my-update-cursor ()
+;;   (setq cursor-type (if (or god-local-mode buffer-read-only) 'box 'bar)))
 
-(add-hook 'god-mode-enabled-hook 'my-update-cursor)
-(add-hook 'god-mode-disabled-hook 'my-update-cursor)
+;; (add-hook 'god-mode-enabled-hook 'my-update-cursor)
+;; (add-hook 'god-mode-disabled-hook 'my-update-cursor)
 
-(evil-define-key 'normal global-map "," 'evil-execute-in-god-state)
-(evil-define-key 'god global-map [escape] 'evil-god-state-bail)
+;; (evil-define-key 'normal global-map "," 'evil-execute-in-god-state)
+;; (evil-define-key 'god global-map [escape] 'evil-god-state-bail)
 
 ;; { key binding
 (global-set-key (kbd "s-<right>") 'move-end-of-line)
@@ -325,6 +378,8 @@
 ;; }}} /org-mode
 
 
+
+
 (require 'web-mode)
 (defun my-web-mode-hook ()
   "Hooks for Web mode."
@@ -340,3 +395,4 @@
 (add-to-list 'ac-modes 'web-mode)
 (setq web-mode-extra-snippets
       '(("erb" . (("=" . "<%= | %>")))))
+(put 'scroll-left 'disabled nil)
