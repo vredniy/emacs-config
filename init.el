@@ -1,4 +1,13 @@
+(eval-when-compile (require 'cl))
+
+(lexical-let ((emacs-start-time (current-time)))
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (let ((elapsed (float-time (time-subtract (current-time) emacs-start-time))))
+                (message "[Emacs initialized in %.3fs]" elapsed)))))
+
 (setq frame-title-format '("%b"))
+
 
 (setq inhibit-startup-message t)
 (menu-bar-mode -1)
