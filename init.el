@@ -51,22 +51,22 @@
   (add-hook 'elixir-mode-hook 'ac-alchemist-setup)
   )
 
-(use-package tabbar-ruler
-  :ensure t
-  :init
-  (setq tabbar-ruler-global-tabbar t)    ; get tabbar
-  ;; (setq tabbar-ruler-global-ruler t)     ; get global ruler
-  ;; (setq tabbar-ruler-popup-menu t)       ; get popup menu.
-  (setq tabbar-ruler-popup-toolbar t)    ; get popup toolbar
-  ;; (setq tabbar-ruler-popup-scrollbar t)  ; show scroll-bar on mouse-move
+;; (use-package tabbar-ruler
+;;   :ensure t
+;;   :init
+;;   (setq tabbar-ruler-global-tabbar t)    ; get tabbar
+;;   ;; (setq tabbar-ruler-global-ruler t)     ; get global ruler
+;;   ;; (setq tabbar-ruler-popup-menu t)       ; get popup menu.
+;;   (setq tabbar-ruler-popup-toolbar t)    ; get popup toolbar
+;;   ;; (setq tabbar-ruler-popup-scrollbar t)  ; show scroll-bar on mouse-move
 
-  ;; The default behavior for tabbar-ruler is to group the tabs by frame. You can change this back to the old-behavior by
-  ;; (setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
+;;   ;; The default behavior for tabbar-ruler is to group the tabs by frame. You can change this back to the old-behavior by
+;;   ;; (setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
 
-  :config
-  ;; you can also group by projectile project easily by
-  ;; (tabbar-ruler-group-by-projectile-project)
-  )
+;;   :config
+;;   ;; you can also group by projectile project easily by
+;;   ;; (tabbar-ruler-group-by-projectile-project)
+;;   )
 
 (use-package evil-search-highlight-persist
   :ensure t
@@ -99,66 +99,113 @@
 ;; (setq ido-enable-flex-matching t)
 ;; (setq ido-use-faces nil)
 
+
+
+;; esc quits
+(defun minibuffer-keyboard-quit ()
+  "Abort recursive edit.
+In Delete Selection mode, if the mark is active, just deactivate it;
+then it takes a second \\[keyboard-quit] to abort the minibuffer."
+  (interactive)
+  (if (and delete-selection-mode transient-mark-mode mark-active)
+      (setq deactivate-mark  t)
+    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+    (abort-recursive-edit)))
+(define-key evil-normal-state-map [escape] 'keyboard-quit)
+(define-key evil-visual-state-map [escape] 'keyboard-quit)
+(define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+(global-set-key [escape] 'evil-exit-emacs-state)
 (global-set-key (kbd "<escape>")      'keyboard-escape-quit)
+
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(initial-frame-alist (quote ((fullscreen . maximized))))
+ '(projectile-globally-ignored-directories
+   (quote
+    (".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "node_modules")))
+ '(projectile-globally-ignored-file-suffixes (quote ("png" "jpeg" "jpg")))
+ '(projectile-sort-order (quote recentf)))
+;; start maximized
+
 
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
 (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
-(require 'desktop+)
+(use-package desktop+
+  :ensure t
+  )
 
 ;; {{{ auto-complete
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+(use-package auto-complete
+  :ensure t
+  :config
+  (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+  (ac-config-default)
+  ;; AC does not complete when you are in face specified by ac-disable-faces. It is '(font-lock-comment-face font-lock-string-face font-lock-doc-face) by default
+  (setq ac-disable-faces nil)
+
+  (setq-default ac-sources '(ac-source-words-in-all-buffer
+                             ac-source-words-in-buffer
+                             ac-source-files-in-current-dir))
+
+  (defun auto-complete-mode-maybe ()
+    "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
+    (unless (minibufferp (current-buffer))
+      (auto-complete-mode 1)))
+  (setq  ac-use-fuzzy t)
+  (setq ac-ignore-case (quote smart))
+  (global-auto-complete-mode t)
+  )
 ;; (defun ac-common-setup ()
 ;; (setq ac-sources (append ac-sources '(ac-source-dictionary))))
-
-(ac-config-default)
-
-;; AC does not complete when you are in face specified by ac-disable-faces. It is '(font-lock-comment-face font-lock-string-face font-lock-doc-face) by default
-(setq ac-disable-faces nil)
-
-(setq-default ac-sources '(ac-source-words-in-all-buffer
-                           ac-source-words-in-buffer
-                           ac-source-files-in-current-dir))
-
-(defun auto-complete-mode-maybe ()
-  "Overwrite auto-complete-mode-maybe which by defaults turns autocomplete only on for buffers listed in ac-modes."
-  (unless (minibufferp (current-buffer))
-    (auto-complete-mode 1)))
-(setq  ac-use-fuzzy t)
-(setq ac-ignore-case (quote smart))
-(global-auto-complete-mode t)
 ;; }}} / auto-complete
 
-(require 'autopair)
-(autopair-global-mode)
+(use-package autopair
+  :ensure t
+  :config
+  (autopair-global-mode)
+  )
 
-(global-undo-tree-mode)
-(setq undo-tree-auto-save-history "~/.emacs.d/.undo-tree-history")
+;; (global-undo-tree-mode)
+;; (setq undo-tree-auto-save-history "~/.emacs.d/.undo-tree-history")
 ;; (setq undo-tree-auto-save-history t)
 ;; (global-set-key (kbd "M-/") 'undo-tree-visualize)
 
-(global-set-key (kbd "C-M-z") 'switch-window)
-(global-set-key (kbd "C->") 'ace-jump-mode)
+;; (global-set-key (kbd "C-M-z") 'switch-window)
+;; (global-set-key (kbd "C->") 'ace-jump-mode)
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (load-theme 'solarized-light t)
 
-(require 'evil-visualstar)
-(global-evil-visualstar-mode)
+(use-package evil-visualstar
+  :ensure t
+  :config
+  (global-evil-visualstar-mode)
+  )
 
 ;; {{{ volatile-highlights
-(require 'volatile-highlights)
-(volatile-highlights-mode t)
+(use-package volatile-highlights
+  :ensure t
+  :config
+  (volatile-highlights-mode t)
 
-(vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
-                      'evil-paste-pop 'evil-move)
-(vhl/install-extension 'evil)
+  (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+                        'evil-paste-pop 'evil-move)
+  (vhl/install-extension 'evil)
 
-(vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
-(vhl/install-extension 'undo-tree)
+  (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+  (vhl/install-extension 'undo-tree)
+  )
 ;; }}} /volatile-highlights
 
 
@@ -179,10 +226,7 @@
 (global-linum-mode t)
 (setq linum-format "%3d \u2502 ")
 
-
 ;; {{ change mode-line color by evil state
-(require 'cl)
-
 (lexical-let ((default-color (cons (face-background 'mode-line)
                                    (face-foreground 'mode-line))))
   (add-hook 'post-command-hook
@@ -238,13 +282,14 @@
 (require 'anzu)
 (global-anzu-mode +1)
 
-(require 'recentf)
-(recentf-mode 1)
-(setq recentf-max-menu-items 250)
-(setq recentf-max-saved-items 250)
-(global-set-key (kbd "s-r") 'helm-recentf)
-
-;; (init-open-recentf)
+(use-package recentf
+  :ensure t
+  :config
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 250)
+  (setq recentf-max-saved-items 250)
+  (global-set-key (kbd "s-r") 'helm-recentf)
+  )
 
 
 ;; appearence
@@ -435,3 +480,9 @@
 (setq web-mode-extra-snippets
       '(("erb" . (("=" . "<%= | %>")))))
 (put 'scroll-left 'disabled nil)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
