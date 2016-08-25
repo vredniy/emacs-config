@@ -1,4 +1,5 @@
-(setq frame-title-format "emacs")
+(setq frame-title-format '("%b"))
+
 (setq inhibit-startup-message t)
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -9,6 +10,8 @@
 (show-paren-mode)
 
 (winner-mode t)
+
+
 
 (windmove-default-keybindings)
 
@@ -36,20 +39,17 @@
   :ensure t
   :config
   (setq alchemist-key-command-prefix (kbd "C-c a"))
-  (add-hook 'elixir-mode-hook 'ac-alchemist-setup))
-;; (unless (package-installed-p 'alchemist)
-;;   (package-install 'alchemist))
-
-;; (require 'alchemist)
+  (add-hook 'elixir-mode-hook 'ac-alchemist-setup)
+  )
 
 (use-package tabbar-ruler
   :ensure t
   :init
   (setq tabbar-ruler-global-tabbar t)    ; get tabbar
-  (setq tabbar-ruler-global-ruler t)     ; get global ruler
-  (setq tabbar-ruler-popup-menu t)       ; get popup menu.
+  ;; (setq tabbar-ruler-global-ruler t)     ; get global ruler
+  ;; (setq tabbar-ruler-popup-menu t)       ; get popup menu.
   (setq tabbar-ruler-popup-toolbar t)    ; get popup toolbar
-  (setq tabbar-ruler-popup-scrollbar t)  ; show scroll-bar on mouse-move
+  ;; (setq tabbar-ruler-popup-scrollbar t)  ; show scroll-bar on mouse-move
 
   ;; The default behavior for tabbar-ruler is to group the tabs by frame. You can change this back to the old-behavior by
   ;; (setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
@@ -232,6 +232,7 @@
 (require 'recentf)
 (recentf-mode 1)
 (setq recentf-max-menu-items 250)
+(setq recentf-max-saved-items 250)
 (global-set-key (kbd "s-r") 'helm-recentf)
 
 ;; (init-open-recentf)
@@ -241,6 +242,12 @@
 (set-frame-font "Hack-14")
 
 (rainbow-identifiers-mode)
+
+(require 'color-identifiers-mode)
+(global-color-identifiers-mode)
+
+(require 'rainbow-delimiters)
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 
 
 ;; {{{ for ruby
@@ -285,6 +292,10 @@
 (define-key evil-normal-state-map (kbd "[ b") 'previous-buffer) ;; Go to previous buffer
 (define-key evil-normal-state-map (kbd "] b") 'next-buffer) ;; Go to next buffer
 
+;; browsing with j/k long wrapped lines
+(define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
+(define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
+
 (with-eval-after-load 'evil
   (defalias #'forward-evil-word #'forward-evil-symbol))
 
@@ -314,6 +325,14 @@
 
 (global-set-key (kbd "s-M-<right>") 'hs-show-block)
 (global-set-key (kbd "s-M-<left>") 'hs-hide-block)
+
+(use-package editorconfig
+  :init
+  ;; (add-hook 'sh-mode-hook
+  ;;           (lambda ()
+  ;;             (editorconfig-mode 0)))
+  (editorconfig-mode 1))
+
 ;; }}} /indentation
 
 
@@ -345,9 +364,16 @@
 (unless (package-installed-p 'ac-inf-ruby)
   (package-install 'ac-inf-ruby))
 
-(unless (package-installed-p 'elixir-mode)
-  (package-install 'elixir-mode))
-
+(use-package elixir-mode
+  :ensure t
+  :config
+  (add-to-list 'elixir-mode-hook
+               (defun auto-activate-ruby-end-mode-for-elixir-mode ()
+                 (set (make-variable-buffer-local 'ruby-end-expand-keywords-before-re)
+                      "\\(?:^\\|\\s-+\\)\\(?:do\\)")
+                 (set (make-variable-buffer-local 'ruby-end-check-statement-modifiers) nil)
+                 (ruby-end-mode +1)))
+  )
 
 ;; {{{ matchit
 (unless (package-installed-p 'evil-matchit)
@@ -364,6 +390,10 @@
 ;; {{{ History
 ;; save history
 (savehist-mode 1)
+
+(setq save-place-file "~/.emacs.d/saveplace")
+(setq-default save-place t)
+(require 'saveplace)
 
 ;; It's also worth pointing out that you can persist other variables across sessions by adding them to savehist-additional-variables
 (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
